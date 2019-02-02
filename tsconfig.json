@@ -1,0 +1,21 @@
+{
+  "exclude": ["server"],
+  "compileOnSave": true,
+  "compilerOptions": {
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    //    Other compiler settings go here
+    "strict": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    // -------------------------------------------------------------------------
+    // no touchy
+    "noEmit": false, // REQUIRED: `"noEmit": false
+    "module": "esnext", // REQUIRED: "module": "esnext"
+    "outDir": "./public/src",
+    "rootDir": "./src",
+    "target": "esnext",
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react" // sort of a lie
+  }
+}
