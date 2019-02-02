@@ -27,8 +27,8 @@ table {
     border-collapse: collapse;
 }
 
-table:not(.event-table):not(.char-table) td,
-table:not(.event-table):not(.char-table) th {
+table td,
+table th {
     tr {
         display: flex;
     }
@@ -45,14 +45,11 @@ table:not(.event-table):not(.char-table) th {
 body {
     height: 100%;
     margin: 0;
-    padding: 0;
+    padding: 0 2rem;
     display: flex;
     flex-direction: column;
     & > header {
-        h1 {
-            padding: 0;
-            margin: 0;
-        }
+        h1 { /*  */ }
     }
     & > main {
         display: flex;
@@ -89,56 +86,4 @@ kbd {
     line-height: 1;
     padding: 2px 4px;
     white-space: nowrap;
-}
-
-// th {
-//     display: flex;
-//     justify-content: center;
-// }
-#input_area.small {
-    input {
-        margin-top: 1rem;
-    }
-}
-
-#output_area.big {
-    flex: 5;
-    flex-grow: none;
-    height: 90vh;
-    > table {
-        table-layout: fixed;
-        height: 75%;
-        width: 100%;
-        td,
-        th {
-            border: 1px solid gray; // width: 100%;
-        }
-        > th:last-of-type {
-            padding-right: 1em;
-        }
-    }
-    > table.event-table > tbody {
-        overflow-y: scroll;
-        height: 100vh;
-        > tr {
-            height: 1.5em;
-            flex-shrink: 0;
-        }
-    }
-}
-
-.char {
-    background-color: plum;
-}
-
-code {
-    sub {
-        font-family: inherit;
-        font-size: smaller;
-    }
-}
-
-.char-cell {
-    display: flex;
-    justify-content: space-evenly;
 }

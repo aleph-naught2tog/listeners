@@ -1,27 +1,29 @@
-type Maybe<T> = T | null | undefined;
-type NullableFunction<T> = (...args: any[]) => Maybe<T>;
-type SafelyReturns<T> = (...args: any[]) => T;
+type AnyFunction = (...args: any[]) => any;
 
-export function makeLoud<T>(
-  functionToWrap: NullableFunction<T>,
+type Safe<T extends AnyFunction> = (
+  ...args: Parameters<T>
+) => NonNullable<ReturnType<T>>;
+
+export function makeLoud<F extends AnyFunction>(
+  functionToWrap: F,
   maybeThisArg?: any
-): SafelyReturns<T> {
-  const boundFunction = functionToWrap.bind(maybeThisArg);
+): Safe<F> {
+  type R = ReturnType<F>;
+  type P = Parameters<F>;
+  const boundFunction = functionToWrap.bind(maybeThisArg) as Safe<F>;
 
-  return function(...args: any[]) {
-    const result: Maybe<T> = boundFunction(...args);
+  return function(...args: P): NonNullable<R> {
+    const result = boundFunction(...args);
     if (result) {
       return result;
     } else {
-      throw new Error("Call was undefined.");
+      throw new Error('Call was undefined.');
     }
   };
 }
 
-type Guard<T> = (item: unknown) => item is T;
-
 export function makeLoudGuard<T>(someGuard: Guard<T>): Guard<T> {
-  return function (item: unknown, failMessage?: string): item is T {
+  return function(item: unknown, failMessage?: string): item is T {
     const result = someGuard(item);
     if (result) {
       return true;
@@ -29,5 +31,5 @@ export function makeLoudGuard<T>(someGuard: Guard<T>): Guard<T> {
       console.error(failMessage);
       throw new Error('Item was not defined.');
     }
-  }
+  };
 }
