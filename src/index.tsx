@@ -22,8 +22,6 @@ function LabelInputPair(props: { id: string }) {
 
 document.addEventListener('DOMContentLoaded', _event => {
   const inputWrapper = getElementById('input_area');
-  const terms = ['apples', 'bears', 'tomato'];
-
   const input = <input type="text" id="type_target" />;
   const table = (
     <table>
@@ -36,51 +34,59 @@ document.addEventListener('DOMContentLoaded', _event => {
     </table>
   );
 
-  const cursor = (
-    <code id="cursor" className="prompt">
-      >
-    </code>
-  );
   const keys = (
-    <div>
-      <div>{cursor}</div>
+    <div id="keys_target">
+      <div className="line">
+        <code className="prompt">></code>
+      </div>
     </div>
   );
 
   let ref = keys.lastElementChild;
 
-  ['keydown', 'beforeinput', 'input', 'keyup'].forEach(eventType => {
-    input.addEventListener(eventType, (event: KeyboardEvent) => {
-      if (event.type === 'keydown') {
-        if (event.key === ' ') {
-          ref.append(<kbd>&nbsp;</kbd>);
-          return;
-        }
+  input.addEventListener('keydown', (event: KeyboardEvent) => {
+    if (event.key === ' ') {
+      ref.append(<kbd>&nbsp;</kbd>);
+      return;
+    }
 
-        const [r, g, b] = hashToRgb(event.key, djb2hash);
-        const contrastColor = getContrastColor([r, g, b]);
-        const eventKey = <kbd>{event.key}</kbd>;
+    const [r, g, b] = hashToRgb(event.key, djb2hash);
+    const contrastColor = getContrastColor([r, g, b]);
+    const eventKey = <kbd className="live">{event.key}</kbd>;
 
-        eventKey.style.backgroundColor = `rgb(${r},${g},${b})`;
-        eventKey.style.color = contrastColor;
+    eventKey.style.backgroundColor = `rgb(${r},${g},${b})`;
+    eventKey.style.color = contrastColor;
 
-        ref.append(eventKey);
+    ref.append(eventKey);
 
-        if (event.key === 'Enter') {
-          input.value = '';
-          cursor.remove();
-          ref.prepend(<code className="prompt">></code>);
-          keys.append(<div>{cursor}</div>);
-          ref = keys.lastElementChild;
-        }
-      }
-    });
+    if (event.key === 'Backspace') {
+      keys.append(keys.lastElementChild.cloneNode(true)); // copy the whole row
+      ref = keys.lastElementChild; // shift to this row
+      ref.lastElementChild.remove(); // delete -- backspace.
+      const copy = ref.lastElementChild.cloneNode() as HTMLElement;
+      copy.append(<del>{ref.lastElementChild.textContent}</del>);
+      ref.replaceChild(copy, ref.lastElementChild); // this is the 'taging' row
+      keys.append(keys.lastElementChild.cloneNode(true)); // copy the whole row again
+      ref.classList.add('ghost'); // add it after cloning
+      ref = keys.lastElementChild;
+      ref.lastElementChild.remove(); // delete the 'del'd element
+    }
+
+    if (event.key === 'Enter') {
+      input.value = '';
+      keys.append(
+        <div className="line">
+          <code className="prompt">></code>
+        </div>
+      );
+
+      ref = keys.lastElementChild;
+    }
   });
 
   inputWrapper.append(
     <>
-      <h3>djb2</h3>
-      <div>
+      <div className="input-wrapper">
         <label htmlFor="type_target">Type here:</label>
         {input}
       </div>
