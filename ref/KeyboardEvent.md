@@ -15,12 +15,20 @@ assuming that `event.preventDefault()` is never fired:
 
 ### examples
 
-| `type`      | `key`   | modifiers  | notes        |
-| ----------- | ------- | ---------- | ------------ |
-| keydown     | "Shift" | `shiftKey` |              |
-| keydown     | "Q"     | `shiftKey` | capital 'Q'  |
-| beforeinput | --      | -----------| ------------ |
-| input       | --      | --         | --           |
-| keyup       | "Q"     | `shiftKey` |
-| keyup       | "Shift" |
+| `type`      | `key`   | modifiers  | notes       |
+| ----------- | ------- | ---------- | ----------- |
+| keydown     | "Shift" | `shiftKey` |             |
+| keydown     | "Q"     | `shiftKey` | capital 'Q' |
+| beforeinput |         |            |             |
+| input       |         |            |             |
+| keyup       | "Q"     | `shiftKey` |             |
+| keyup       | "Shift" |            |             |
 
+| `type`  | `key`     | modifiers         | notes |
+| ------- | --------- | ----------------- | ----- |
+| keydown | "Control" | ctrlKey           |       |
+| keydown | "Shift    | ctrlKey, shiftKey |       |
+| keydown | "V"       | ctrlKey, shiftKey |       |
+| keyup   | "V"       | ctrlKey, shiftKey |       |
+| keyup   | "Shift"   | ctrlKey           |       |
+| keyup   | "Control" |                   |       |
