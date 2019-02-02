@@ -19,3 +19,5 @@ document.addEventListener("beforeunload", () => {
   // when we refresh/leave the page
   webSocket.close();
 });
+
+export default webSocket;

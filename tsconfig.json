@@ -1,12 +1,11 @@
 {
-  "exclude": ["server", "node_modules", "public"],
+  "exclude": ["server"],
   "compileOnSave": true,
   "compilerOptions": {
     "sourceMap": true,
     "experimentalDecorators": true,
     "jsx": "react", // sort of a lie
     "strict": true,
-    "checkJs": false,
     "resolveJsonModule": true,
     // -------------------------------------------------------------------------
     // no touchy
@@ -16,6 +15,7 @@
     "outDir": "./public/src",
     "rootDir": "./src",
     "target": "esnext",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true
   }
 }

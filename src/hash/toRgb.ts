@@ -1,40 +1,70 @@
 const clampToPos255 = (value: number) => {
   if (value < 0) {
-    const twosComplement = ~value + 1;
-    return twosComplement % 255;
+    return ~value % 255;
   } else {
     return value % 255;
   }
 };
 
-const splitter = {
+const rgbSplitter = {
   [Symbol.split](input: string) {
-    const substringLength =
+    const substringLength = (input.length / 3) | 1;
+
+    return [
+      input.substr(0, substringLength),
+      input.substr(2, substringLength),
+      input.substr(4, substringLength)
+    ];
   }
 };
 
-function hashToRgb(
+export function getContrastColorRatio(rgb: number[] | string) {
+  let red = 0;
+  let green = 0;
+  let blue = 0;
+
+  if (typeof rgb === 'string') {
+    const [char] = rgb;
+    if (char === '#') {
+      // #<6 hex digits>
+      const split = rgb.replace('#', '').split(rgbSplitter);
+      red = parseInt(split[0], 16);
+      green = parseInt(split[1], 16);
+      blue = parseInt(split[2], 16);
+    } else {
+      // rgb(r,g,b)
+      const split = rgb.replace(/[rgb\(\)\s]/, '').split(',');
+      red = Number(split[0]);
+      green = Number(split[1]);
+      blue = Number(split[2]);
+    }
+  } else {
+    red = rgb[0];
+    green = rgb[1];
+    blue = rgb[2];
+  }
+
+  return (red * 299 + green * 587 + blue * 114) / 1000;
+}
+
+export function getContrastColor(rgb: number[] | string) {
+  if (getContrastColorRatio(rgb) >= 128) {
+    return 'black';
+  } else {
+    return 'whitesmoke';
+  }
+}
+
+export function hashToRgb(
   someString: string,
   hashFunction: (str: string) => number
 ) {
   if (!someString || someString.length === 0) {
-    return null;
+    throw new Error("Can't hash null");
   }
 
-  const partCount = 3; // [r,g,b]
-  const lengthOfString = someString.length;
-  const remainder = lengthOfString % partCount;
-  const maxLengthDivisibleByPartCount = lengthOfString - remainder;
-  const substringLength = maxLengthDivisibleByPartCount / partCount;
-  const baseSubstring = someString.substr(0, maxLengthDivisibleByPartCount);
-
-  const [baseForRed, baseForGreen, baseForBlue] = [
-    baseSubstring.slice(0, substringLength),
-    baseSubstring.slice(substringLength, 2 * substringLength),
-    baseSubstring.slice(substringLength * 2, maxLengthDivisibleByPartCount)
-  ];
-
-  const [red, green, blue] = [baseForRed, baseForGreen, baseForBlue]
+  const [red, green, blue] = someString
+    .split(rgbSplitter)
     .map(hashFunction)
     .map(clampToPos255);
 

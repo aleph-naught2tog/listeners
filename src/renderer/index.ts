@@ -70,10 +70,9 @@ function makeComponent<K extends tagNames>(
   props: Partial<JSX.IntrinsicElements[K]>,
   ...children: React.childType[]
 ): ReturnType<React.ComponentFunction<K>> {
-  console.log(elementFunction);
-  console.log(props);
-  console.log(...children);
-  const result = elementFunction(props);
+  const result = elementFunction.prototype.render
+    ? new elementFunction(props).render()
+    : elementFunction(props);
 
   if (result === undefined || result === null) {
     throw new Error('Component was undefined');
@@ -87,6 +86,11 @@ function makeComponent<K extends tagNames>(
   }
 
   return result;
+}
+
+export class Component {
+  static readonly instanceType = Symbol.for('ReactComponent');
+  render() {}
 }
 
 export class React {

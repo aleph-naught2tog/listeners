@@ -24,6 +24,8 @@ declare namespace React {
   ) => HTMLElementTagNameMap[K];
 
   type childType = string | number | HTMLElement;
+
+  class Component { }
 }
 
 declare namespace JSX {
