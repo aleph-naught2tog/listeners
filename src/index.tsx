@@ -11,19 +11,30 @@ const printable = (char: string | number) => {
   return asInt >= 32 && asInt <= 126;
 };
 
+type t = Partial<HTMLTableElement> & {
+  children?: HTMLCollection | undefined;
+};
+
 document.addEventListener('DOMContentLoaded', _event => {
   const inputWrapper = getElementById('input_area');
   const input = <input type="text" id="type_target" />;
-  const table = (
-    <table>
-      <thead>
-        <tr>
-          <th>Event</th>
-          <th>Key</th>
-        </tr>
-      </thead>
-    </table>
+  const testDiv = (
+    <div>
+      {null}
+      {undefined}
+      {Symbol('pears')}
+      {['apples', 'pears', 'oranges'].map(str => (
+        <>
+          {99}
+          <div>{str}</div>
+          <br />
+          {true}
+        </>
+      ))}
+    </div>
   );
+
+  inputWrapper.append(testDiv);
 
   const keys: HTMLElement = (
     <div id="keys_target">
@@ -46,10 +57,12 @@ document.addEventListener('DOMContentLoaded', _event => {
       keys.append(lastElement);
     }
 
-    let keyContent = event.key;
+    let keyContent: Text;
 
     if (event.key === ' ') {
       keyContent = <node>&nbsp;</node>;
+    } else {
+      keyContent = <node>{event.key}</node>;
     }
 
     const [r, g, b] = hashToRgb(event.key, djb2hash);

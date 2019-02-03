@@ -1,6 +1,12 @@
 # Keyboard Events
 
-# Keyboard Events
+## default actions
+
+dispatched after keydown/before keyup
+
+* tab -> MUST shift focus
+* if produces a character then must character
+* enter or space -> MUST dispatch a click
 
 ## event loop
 

@@ -1,84 +1,76 @@
-type elementNames = Exclude<keyof JSX.IntrinsicElements, 'node'>; // exclude extra tag name here
+type tags = Exclude<keyof JSX.IntrinsicElements, 'node'>; // exclude extra tag name here
 
-type PropTypes<
-  ElementType extends keyof HTMLElementTagNameMap
-> = JSX.IntrinsicElements[ElementType];
+function addChildren(
+  fragment: Node,
+  children: React.childType[] | (React.childType[])[]
+): void {
+  for (let index = 0; index < children.length; index += 1) {
+    const child = children[index];
 
-function makeTraditionalElement<ElementType extends elementNames>(
-  elementType: ElementType,
-  props: PropTypes<ElementType>,
-  ...children: React.childType[]
-): HTMLElementTagNameMap[ElementType] | DocumentFragment {
-  const element = elementType
-    ? document.createElement(elementType)
-    : document.createDocumentFragment();
+    if (!child) {
+      continue;
+    }
 
-  if (!(element instanceof DocumentFragment)) {
+    if (child instanceof Node) {
+      fragment.appendChild(child);
+      continue;
+    }
+
+    if (child instanceof Array) {
+      const childFragment = document.createDocumentFragment();
+      addChildren(childFragment, child);
+      fragment.appendChild(childFragment);
+      continue;
+    }
+
+    fragment.appendChild(document.createTextNode(child.toString()));
+  }
+}
+
+function makeTraditionalElement<E extends tags>(
+  elementType: E,
+  props: Partial<JSX.IntrinsicElements[E]>,
+  children: React.childType[] | (React.childType[])[]
+): HTMLElementTagNameMap[E] | DocumentFragment {
+  let element: HTMLElementTagNameMap[E] | DocumentFragment;
+
+  if (elementType) {
+    element = document.createElement(elementType);
     for (const propKey in props) {
       const value = props[propKey];
 
       if (!propKey.startsWith('data-')) {
-        element[
-          propKey
-        ] = value as HTMLElementTagNameMap[ElementType][typeof propKey];
+        type valueType = HTMLElementTagNameMap[E][typeof propKey];
+        element[propKey] = value as valueType;
       } else {
         element.setAttribute(propKey, (value as unknown) as string);
       }
     }
+  } else {
+    element = document.createDocumentFragment();
   }
 
   if (children) {
     const fragment = document.createDocumentFragment();
-
-    for (const child of children) {
-      if (child instanceof Array) {
-        fragment.append(...child);
-        continue;
-      }
-
-      let node;
-
-      switch (typeof child) {
-        case 'number':
-          node = document.createTextNode(child.toString());
-          break;
-        case 'string':
-          node = document.createTextNode(child);
-          break;
-        case 'boolean':
-          node = document.createTextNode(child ? 'true' : 'false');
-          break;
-        default:
-          node = child;
-          break;
-      }
-
-      fragment.append(node);
-    }
-
+    addChildren(fragment, children);
     element.appendChild(fragment);
   }
 
   return element;
 }
 
-function makeComponent<K extends elementNames>(
-  elementFunction: React.ComponentFunction<K>,
-  props: Partial<JSX.IntrinsicElements[K]>,
-  ...children: React.childType[]
-): ReturnType<React.ComponentFunction<K>> {
+function makeComponent<E extends tags>(
+  elementFunction: React.ComponentFunction<E>,
+  props: Partial<JSX.IntrinsicElements[E]>,
+  children: React.childType[] | (React.childType[])[]
+): ReturnType<React.ComponentFunction<E>> {
   const result = elementFunction(props);
 
   if (result === undefined || result === null) {
     throw new Error('Component was undefined');
   }
 
-  if (children) {
-    for (const child of children) {
-      const node = document.createTextNode(child.toString());
-      result.appendChild(node);
-    }
-  }
+  addChildren(result, children);
 
   return result;
 }
@@ -87,39 +79,32 @@ export class React {
   static createElement(
     elementDiscriminant:
       | 'node'
-      | elementNames
-      | React.ComponentFunction<elementNames>,
-    props: Partial<JSX.IntrinsicElements[elementNames]>,
-    ...children: React.childType[]
-  ): JSX.IntrinsicElements[elementNames] | DocumentFragment {
+      | tags
+      | React.ComponentFunction<tags>,
+    props: Partial<JSX.IntrinsicElements[tags]>,
+    ...children: React.childType[] | (React.childType[])[]
+  ): JSX.IntrinsicElements[tags] | DocumentFragment {
     if (typeof elementDiscriminant === 'function') {
-      const component = makeComponent(elementDiscriminant, props, ...children);
-      return component;
-    } else {
-      if (elementDiscriminant === 'node') {
-        if (props && props.textContent) {
-          return document.createTextNode(props.textContent);
-        }
+      return makeComponent(elementDiscriminant, props, children);
+    }
 
-        let textContent = '';
-
-        for (const child of children) {
-          if (typeof child !== 'string' && typeof child !== 'number') {
-            console.warn('Received the wrong kind of children for text');
-            console.warn('This is a noop');
-            console.warn('However, it will not be added to the DOM.');
-            console.log(child, typeof child);
-            throw new Error();
-          }
-
-          textContent += child;
-        }
-
-        return document.createTextNode(textContent);
+    if (elementDiscriminant === 'node') {
+      if (props && props.textContent) {
+        return document.createTextNode(props.textContent);
       }
 
-      return makeTraditionalElement(elementDiscriminant, props, ...children);
+      let textContent = '';
+
+      for (let index = 0; index < children.length; index += 1) {
+        if (children[index]) {
+          textContent += children[index].toString();
+        }
+      }
+
+      return document.createTextNode(textContent);
     }
+
+    return makeTraditionalElement(elementDiscriminant, props, children);
   }
 }
 
