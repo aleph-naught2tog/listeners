@@ -39,11 +39,18 @@ function makeTraditionalElement<E extends tags>(
     for (const propKey in props) {
       const value = props[propKey];
 
-      if (!propKey.startsWith('data-')) {
-        type valueType = HTMLElementTagNameMap[E][typeof propKey];
-        element[propKey] = value as valueType;
-      } else {
+      if (propKey.startsWith('data-')) {
         element.setAttribute(propKey, (value as unknown) as string);
+      } else {
+        if (propKey === 'style') {
+          const style = (value as unknown) as CSSStyleDeclaration;
+          for (const styleKey in style) {
+            element.style[styleKey] = style[styleKey];
+          }
+        } else {
+          type valueType = HTMLElementTagNameMap[E][typeof propKey];
+          element[propKey] = value as valueType;
+        }
       }
     }
   } else {
@@ -77,10 +84,7 @@ function makeComponent<E extends tags>(
 
 export class React {
   static createElement(
-    elementDiscriminant:
-      | 'node'
-      | tags
-      | React.ComponentFunction<tags>,
+    elementDiscriminant: 'node' | tags | React.ComponentFunction<tags>,
     props: Partial<JSX.IntrinsicElements[tags]>,
     ...children: React.childType[] | (React.childType[])[]
   ): JSX.IntrinsicElements[tags] | DocumentFragment {

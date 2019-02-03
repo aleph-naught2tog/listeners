@@ -6,6 +6,7 @@ declare namespace Renderer {
   type Attributes = {
     [tag in keyof tagMap]: Partial<element<tag>> & {
       children?: HTMLCollection;
+      style?: Partial<CSSStyleDeclaration>;
     }
   };
 }
@@ -29,7 +30,7 @@ declare namespace React {
 declare namespace JSX {
   interface IntrinsicElements extends Renderer.Attributes {
     node: {
-      children?: string | number,
+      children?: string | number;
     } & Partial<Text>; // 1. add new key here // 2. add partial attrs
   }
 

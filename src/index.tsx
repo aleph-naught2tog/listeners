@@ -18,96 +18,63 @@ type t = Partial<HTMLTableElement> & {
 document.addEventListener('DOMContentLoaded', _event => {
   const inputWrapper = getElementById('input_area');
   const input = <input type="text" id="type_target" />;
-  const testDiv = (
-    <div>
-      {null}
-      {undefined}
-      {Symbol('pears')}
-      {['apples', 'pears', 'oranges'].map(str => (
-        <>
-          {99}
-          <div>{str}</div>
-          <br />
-          {true}
-        </>
-      ))}
-    </div>
-  );
+  const tbody = <tbody />;
+  const table = (
+    <table>
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>key</th>
+          <th>code</th>
+          <th>Modifiers</th>
+        </tr>
+      </thead>
+      {tbody}
+    </table>
+  ) as HTMLTableElement;
 
-  inputWrapper.append(testDiv);
-
-  const keys: HTMLElement = (
-    <div id="keys_target">
-      <div className="line">
-        <code className="prompt">></code>
-      </div>
-    </div>
-  );
+  inputWrapper.append(table);
 
   input.addEventListener('keydown', (event: KeyboardEvent) => {
-    let lastElement = keys.lastElementChild;
+    event.preventDefault();
+    tbody.prepend(
+      <tr>
+        <td>{event.type}</td>
+        <td>
+          <EventKey key={event.key} />
+        </td>
+        <td>
+          <EventKey key={event.code} />
+        </td>
+        <td>
+          {event.ctrlKey && <EventKey key="Control" />}
+          {event.metaKey && <EventKey key="Meta" />}
+          {event.altKey && <EventKey key="Alt" />}
+          {event.shiftKey && <EventKey key="Shift" />}
+        </td>
+      </tr>
+    );
+  });
 
-    if (!lastElement) {
-      lastElement = (
-        <div className="line">
-          <code className="prompt">></code>
-        </div>
-      ) as HTMLElement;
-
-      keys.append(lastElement);
-    }
-
-    let keyContent: Text;
-
-    if (event.key === ' ') {
-      keyContent = <node>&nbsp;</node>;
-    } else {
-      keyContent = <node>{event.key}</node>;
-    }
-
-    const [r, g, b] = hashToRgb(event.key, djb2hash);
-    const contrastColor = getContrastColor([r, g, b]);
-    const eventKey = <kbd className="live">{keyContent}</kbd>;
-
-    eventKey.style.backgroundColor = `rgb(${r},${g},${b})`;
-    eventKey.style.color = contrastColor;
-
-    lastElement.append(eventKey);
-
-    if (event.key === 'Backspace') {
-      // lastElement = lastElement.cloneNode(true);
-      keys.append(keys.lastElementChild.cloneNode(true)); // copy the whole row
-      lastElement = keys.lastElementChild; // shift to this row
-      lastElement.lastElementChild.remove(); // delete -- backspace.
-      const copy = lastElement.lastElementChild.cloneNode() as HTMLElement;
-      copy.append(
-        <del>
-          <node>{lastElement.lastElementChild.textContent}</node>
-        </del>
-      );
-      lastElement.replaceChild(copy, lastElement.lastElementChild); // this is the 'taging' row
-      keys.append(keys.lastElementChild.cloneNode(true)); // copy the whole row again
-      lastElement.classList.add('ghost'); // add it after cloning
-      lastElement = keys.lastElementChild;
-      lastElement.lastElementChild.remove(); // delete the 'del'd element
-    }
-
-    if (event.key === 'Enter') {
-      // here we would save the input
-      // or save our steps.
-
-      // Reset the input
-      input.value = '';
-
-      // Add the new, only line.
-      keys.append(
-        <div className="line">
-          <code className="prompt">></code>
-        </div>
-      );
-
-      lastElement = keys.lastElementChild;
-    }
+  input.addEventListener('keyup', (event: KeyboardEvent) => {
+    event.preventDefault();
+    tbody.prepend(
+      <tr>
+        <td>{event.type}</td>
+        <td>
+          <EventKey key={event.key} />
+        </td>
+        <td>
+          <EventKey key={event.code} />
+        </td>
+        <td>
+          {event.ctrlKey && <EventKey key="Control" />}
+          {event.metaKey && <EventKey key="Meta" />}
+          {event.altKey && <EventKey key="Alt" />}
+          {event.shiftKey && <EventKey key="Shift" />}
+        </td>
+      </tr>
+    );
   });
 
   inputWrapper.append(
@@ -116,8 +83,20 @@ document.addEventListener('DOMContentLoaded', _event => {
         <label htmlFor="type_target">Type here:</label>
         {input}
       </div>
-      {keys}
       <hr />
+      {table}
     </>
   );
 });
+
+function EventKey({ key }: { key: string }) {
+  const [r, g, b] = hashToRgb(key, djb2hash);
+  const contrastColor = getContrastColor([r, g, b]);
+
+  const style = {
+    backgroundColor: `rgb(${r},${g},${b})`,
+    color: contrastColor
+  } as CSSStyleDeclaration;
+
+  return <kbd style={style}>{key}</kbd>;
+}
