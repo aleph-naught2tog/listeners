@@ -1,4 +1,4 @@
-import { React, Component } from './renderer/index';
+import { React } from './renderer/index';
 import { html } from './html/core';
 import { hashToRgb, getContrastColor } from './hash/toRgb';
 import { djb2hash, sdbmhash } from './hash/algorithms';
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', _event => {
     </table>
   );
 
-  const keys = (
+  const keys: HTMLElement = (
     <div id="keys_target">
       <div className="line">
         <code className="prompt">></code>
@@ -45,14 +45,15 @@ document.addEventListener('DOMContentLoaded', _event => {
   let ref = keys.lastElementChild;
 
   input.addEventListener('keydown', (event: KeyboardEvent) => {
+    let keyContent = event.key;
+
     if (event.key === ' ') {
-      ref.append(<kbd>&nbsp;</kbd>);
-      return;
+      keyContent = '&nbsp';
     }
 
     const [r, g, b] = hashToRgb(event.key, djb2hash);
     const contrastColor = getContrastColor([r, g, b]);
-    const eventKey = <kbd className="live">{event.key}</kbd>;
+    const eventKey = <kbd className="live">{keyContent}</kbd>;
 
     eventKey.style.backgroundColor = `rgb(${r},${g},${b})`;
     eventKey.style.color = contrastColor;
@@ -73,7 +74,18 @@ document.addEventListener('DOMContentLoaded', _event => {
     }
 
     if (event.key === 'Enter') {
+      // here we would save the input
+      // or save our steps.
+
+      // Reset the input
       input.value = '';
+
+      // Reset the keyboard-y view
+      while (keys.lastElementChild) {
+        keys.lastElementChild.remove();
+      }
+
+      // Add the new, only line.
       keys.append(
         <div className="line">
           <code className="prompt">></code>

@@ -29,7 +29,11 @@ declare namespace React {
 }
 
 declare namespace JSX {
-  interface IntrinsicElements extends Renderer.Attributes {}
+  interface IntrinsicElements extends Renderer.Attributes {
+    node: {
+      children?: string | number,
+    } & Partial<Text>; // 1. add new key here // 2. add partial attrs
+  }
 
   interface BasicElements extends HTMLElementTagNameMap {
     a: HTMLAnchorElement;
