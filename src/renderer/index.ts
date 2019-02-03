@@ -97,17 +97,18 @@ export class React {
       return component;
     } else {
       if (elementDiscriminant === 'node') {
-        if (props.textContent) {
+        if (props && props.textContent) {
           return document.createTextNode(props.textContent);
         }
 
         let textContent = '';
+
         for (const child of children) {
-          if (typeof child !== 'string' || typeof child !== 'number') {
+          if (typeof child !== 'string' && typeof child !== 'number') {
             console.warn('Received the wrong kind of children for text');
             console.warn('This is a noop');
             console.warn('However, it will not be added to the DOM.');
-            console.log(child);
+            console.log(child, typeof child);
             throw new Error();
           }
 

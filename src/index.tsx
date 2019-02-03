@@ -11,15 +11,6 @@ const printable = (char: string | number) => {
   return asInt >= 32 && asInt <= 126;
 };
 
-function LabelInputPair(props: { id: string }) {
-  return (
-    <>
-      <label htmlFor="" />
-      <input type="text" />
-    </>
-  );
-}
-
 document.addEventListener('DOMContentLoaded', _event => {
   const inputWrapper = getElementById('input_area');
   const input = <input type="text" id="type_target" />;
@@ -42,13 +33,23 @@ document.addEventListener('DOMContentLoaded', _event => {
     </div>
   );
 
-  let ref = keys.lastElementChild;
-
   input.addEventListener('keydown', (event: KeyboardEvent) => {
+    let lastElement = keys.lastElementChild;
+
+    if (!lastElement) {
+      lastElement = (
+        <div className="line">
+          <code className="prompt">></code>
+        </div>
+      ) as HTMLElement;
+
+      keys.append(lastElement);
+    }
+
     let keyContent = event.key;
 
     if (event.key === ' ') {
-      keyContent = '&nbsp';
+      keyContent = <node>&nbsp;</node>;
     }
 
     const [r, g, b] = hashToRgb(event.key, djb2hash);
@@ -58,19 +59,24 @@ document.addEventListener('DOMContentLoaded', _event => {
     eventKey.style.backgroundColor = `rgb(${r},${g},${b})`;
     eventKey.style.color = contrastColor;
 
-    ref.append(eventKey);
+    lastElement.append(eventKey);
 
     if (event.key === 'Backspace') {
+      // lastElement = lastElement.cloneNode(true);
       keys.append(keys.lastElementChild.cloneNode(true)); // copy the whole row
-      ref = keys.lastElementChild; // shift to this row
-      ref.lastElementChild.remove(); // delete -- backspace.
-      const copy = ref.lastElementChild.cloneNode() as HTMLElement;
-      copy.append(<del>{ref.lastElementChild.textContent}</del>);
-      ref.replaceChild(copy, ref.lastElementChild); // this is the 'taging' row
+      lastElement = keys.lastElementChild; // shift to this row
+      lastElement.lastElementChild.remove(); // delete -- backspace.
+      const copy = lastElement.lastElementChild.cloneNode() as HTMLElement;
+      copy.append(
+        <del>
+          <node>{lastElement.lastElementChild.textContent}</node>
+        </del>
+      );
+      lastElement.replaceChild(copy, lastElement.lastElementChild); // this is the 'taging' row
       keys.append(keys.lastElementChild.cloneNode(true)); // copy the whole row again
-      ref.classList.add('ghost'); // add it after cloning
-      ref = keys.lastElementChild;
-      ref.lastElementChild.remove(); // delete the 'del'd element
+      lastElement.classList.add('ghost'); // add it after cloning
+      lastElement = keys.lastElementChild;
+      lastElement.lastElementChild.remove(); // delete the 'del'd element
     }
 
     if (event.key === 'Enter') {
@@ -80,11 +86,6 @@ document.addEventListener('DOMContentLoaded', _event => {
       // Reset the input
       input.value = '';
 
-      // Reset the keyboard-y view
-      while (keys.lastElementChild) {
-        keys.lastElementChild.remove();
-      }
-
       // Add the new, only line.
       keys.append(
         <div className="line">
@@ -92,7 +93,7 @@ document.addEventListener('DOMContentLoaded', _event => {
         </div>
       );
 
-      ref = keys.lastElementChild;
+      lastElement = keys.lastElementChild;
     }
   });
 
