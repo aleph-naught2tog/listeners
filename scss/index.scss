@@ -130,6 +130,10 @@ kbd {
     }
 }
 
+.keydown {
+    filter: brightness(75%);
+}
+
 .line {
 
     &:last-child {

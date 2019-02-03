@@ -34,66 +34,54 @@ document.addEventListener('DOMContentLoaded', _event => {
   );
 
   input.addEventListener('keydown', (event: KeyboardEvent) => {
-    let lastElement = keys.lastElementChild;
-
-    if (!lastElement) {
-      lastElement = (
-        <div className="line">
-          <code className="prompt">></code>
-        </div>
-      ) as HTMLElement;
-
-      keys.append(lastElement);
+    let currentInputRow = keys.lastElementChild;
+    if (!currentInputRow) {
+      currentInputRow = <div className="line" /> as HTMLElement;
+      keys.append(currentInputRow);
     }
 
     let keyContent = event.key;
-
     if (event.key === ' ') {
       keyContent = <node>&nbsp;</node>;
     }
 
-    const [r, g, b] = hashToRgb(event.key, djb2hash);
+    const [r, g, b] = hashToRgb(event.key, sdbmhash);
     const contrastColor = getContrastColor([r, g, b]);
-    const eventKey = <kbd className="live">{keyContent}</kbd>;
-
+    const eventKey = <kbd>{keyContent}</kbd>;
     eventKey.style.backgroundColor = `rgb(${r},${g},${b})`;
     eventKey.style.color = contrastColor;
 
-    lastElement.append(eventKey);
-
-    if (event.key === 'Backspace') {
-      // lastElement = lastElement.cloneNode(true);
-      keys.append(keys.lastElementChild.cloneNode(true)); // copy the whole row
-      lastElement = keys.lastElementChild; // shift to this row
-      lastElement.lastElementChild.remove(); // delete -- backspace.
-      const copy = lastElement.lastElementChild.cloneNode() as HTMLElement;
-      copy.append(
-        <del>
-          <node>{lastElement.lastElementChild.textContent}</node>
-        </del>
-      );
-      lastElement.replaceChild(copy, lastElement.lastElementChild); // this is the 'taging' row
-      keys.append(keys.lastElementChild.cloneNode(true)); // copy the whole row again
-      lastElement.classList.add('ghost'); // add it after cloning
-      lastElement = keys.lastElementChild;
-      lastElement.lastElementChild.remove(); // delete the 'del'd element
-    }
-
     if (event.key === 'Enter') {
-      // here we would save the input
-      // or save our steps.
+      // Add before we add the new line
+      currentInputRow.append(eventKey);
+
+      // Add the new, only line.
+      keys.append(<div className="line" />);
 
       // Reset the input
       input.value = '';
+      return;
+    }
 
-      // Add the new, only line.
-      keys.append(
-        <div className="line">
-          <code className="prompt">></code>
-        </div>
-      );
+    if (event.key !== 'Backspace') {
+      currentInputRow.append(eventKey);
+      return;
+    }
 
-      lastElement = keys.lastElementChild;
+    if (event.key === 'Backspace') {
+      if (currentInputRow.childElementCount <= 1) {
+        return;
+      }
+
+      // copy the whole row BEFORE adding
+      const nextRow = currentInputRow.cloneNode(true) as HTMLElement;
+      keys.append(nextRow);
+
+      // apply the backspace
+      nextRow.lastElementChild.remove();
+
+      currentInputRow.append(eventKey);
+      return;
     }
   });
 
