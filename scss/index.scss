@@ -96,47 +96,6 @@ kbd {
     white-space: nowrap;
 }
 
-#keys_target {
-    & > div {
-        margin: 0.25rem;
-    }
-}
-
-.prompt {
-    padding: 1rem 0.5rem;
-}
-
 .input-wrapper {
     margin: 0.5rem;
-}
-
-#cursor {
-    background-color: hsla(0, 0%, 93%, 0.5);
-    color: transparent;
-    display: inline-block;
-    font-family: consolas, "Liberation Mono", courier, monospace;
-    font-size: 1em;
-    font-weight: 700;
-    line-height: 1;
-    width: 0.5rem;
-    height: 1rem;
-    white-space: nowrap;
-}
-
-.ghost {
-    & code:first-child {
-        color: transparent;
-        background-color: transparent;
-    }
-}
-
-.line {
-
-    &:last-child {
-        margin-top: 2rem;
-    }
-
-    &:not(:last-child) {
-        opacity: 0.75;
-    }
 }

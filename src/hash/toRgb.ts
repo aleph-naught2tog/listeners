@@ -55,6 +55,44 @@ export function getContrastColor(rgb: number[] | string) {
   }
 }
 
+type colorContrastPair = {
+  color: {
+    red: string | number;
+    green: string | number;
+    blue: string | number;
+  };
+  contrastColor: string;
+};
+
+const HASH_CACHE: { [key: string]: { [key: string]: colorContrastPair } } = {};
+
+export function getHashedColorPair(
+  someString: string,
+  hashFunction: (str: string) => number
+): colorContrastPair {
+  if (hashFunction.name in HASH_CACHE) {
+    if (someString in HASH_CACHE[hashFunction.name]) {
+      return HASH_CACHE[hashFunction.name][someString];
+    }
+    // Otherwise -- we need to run the whole function
+  } else {
+    // add that hash
+    HASH_CACHE[hashFunction.name] = {};
+  }
+
+  const [r, g, b] = hashToRgb(someString, hashFunction);
+  const contrastColor = getContrastColor([r, g, b]);
+
+  const pair = {
+    color: { red: r, green: g, blue: b },
+    contrastColor: contrastColor
+  };
+
+  HASH_CACHE[hashFunction.name][someString] = pair;
+
+  return pair;
+}
+
 export function hashToRgb(
   someString: string,
   hashFunction: (str: string) => number

@@ -2,7 +2,7 @@ type tags = Exclude<keyof JSX.IntrinsicElements, 'node'>; // exclude extra tag n
 
 function addChildren(
   fragment: Node,
-  children: React.childType[] | (React.childType[])[]
+  children: childType[] | (childType[])[]
 ): void {
   for (let index = 0; index < children.length; index += 1) {
     const child = children[index];
@@ -27,15 +27,18 @@ function addChildren(
   }
 }
 
+const elementIndex: { [key: string]: number } = {};
+
 function makeTraditionalElement<E extends tags>(
   elementType: E,
   props: Partial<JSX.IntrinsicElements[E]>,
-  children: React.childType[] | (React.childType[])[]
+  children: childType[] | (childType[])[]
 ): HTMLElementTagNameMap[E] | DocumentFragment {
   let element: HTMLElementTagNameMap[E] | DocumentFragment;
 
   if (elementType) {
     element = document.createElement(elementType);
+
     for (const propKey in props) {
       const value = props[propKey];
 
@@ -67,10 +70,10 @@ function makeTraditionalElement<E extends tags>(
 }
 
 function makeComponent<E extends tags>(
-  elementFunction: React.ComponentFunction<E>,
+  elementFunction: ComponentFunction<E>,
   props: Partial<JSX.IntrinsicElements[E]>,
-  children: React.childType[] | (React.childType[])[]
-): ReturnType<React.ComponentFunction<E>> {
+  children: childType[] | (childType[])[]
+): ReturnType<ComponentFunction<E>> {
   const result = elementFunction(props);
 
   if (result === undefined || result === null) {
@@ -84,9 +87,9 @@ function makeComponent<E extends tags>(
 
 export class React {
   static createElement(
-    elementDiscriminant: 'node' | tags | React.ComponentFunction<tags>,
+    elementDiscriminant: 'node' | tags | ComponentFunction<tags>,
     props: Partial<JSX.IntrinsicElements[tags]>,
-    ...children: React.childType[] | (React.childType[])[]
+    ...children: childType[] | (childType[])[]
   ): JSX.IntrinsicElements[tags] | DocumentFragment {
     if (typeof elementDiscriminant === 'function') {
       return makeComponent(elementDiscriminant, props, children);

@@ -1,102 +1,136 @@
 import { React } from './renderer/index';
 import { html } from './html/core';
-import { hashToRgb, getContrastColor } from './hash/toRgb';
-import { djb2hash, sdbmhash } from './hash/algorithms';
+import { EventKey } from './EventKey';
+import { Swatch } from './Swatch';
 
 const { getElementById } = html.loudlyBind(document);
 
-const printable = (char: string | number) => {
-  const asInt = typeof char === 'number' ? char : char.charCodeAt(0);
+const MOUSE_EVENTS: mouseEventType[] = [
+  'mousedown',
+  'mouseenter',
+  'mouseleave',
+  'mousemove',
+  'mouseout',
+  'mouseover',
+  'mouseup',
+  'click',
+  'dblclick'
+];
 
-  return asInt >= 32 && asInt <= 126;
-};
+function addMouseEventRow(
+  table: HTMLTableElement
+): (event: MouseEvent) => void {
+  const listener = (event: MouseEvent): void => {
+    const tbody = table.tBodies.item(0);
+    const target = event.target as HTMLElement;
+    const relatedTarget = event.relatedTarget as HTMLElement;
 
-type t = Partial<HTMLTableElement> & {
-  children?: HTMLCollection | undefined;
-};
+    if (tbody) {
+      tbody.prepend(
+        <tr>
+          <td>{event.type}</td>
+          <td>
+            {target && (
+              <Swatch forId={target.id ? target.id : target.tagName} />
+            )}
+          </td>
+          <td>
+            {relatedTarget && (
+              <Swatch
+                forId={
+                  relatedTarget.id ? relatedTarget.id : relatedTarget.tagName
+                }
+              />
+            )}
+          </td>
+          <td>{buttonsView(event)}</td>
+          <td>{modifierKeyView(event)}</td>
+        </tr>
+      );
+    }
+  };
+
+  return listener;
+}
 
 document.addEventListener('DOMContentLoaded', _event => {
-  const inputWrapper = getElementById('input_area');
-  const input = <input type="text" id="type_target" />;
-  const tbody = <tbody />;
-  const table = (
-    <table>
-      <thead>
-        <tr>
-          <th>Event</th>
-          <th>key</th>
-          <th>code</th>
-          <th>Modifiers</th>
-        </tr>
-      </thead>
-      {tbody}
-    </table>
-  ) as HTMLTableElement;
+  const inputArea = getElementById('input_area');
+  const outputArea = getElementById('output_area');
+  const table = <Table caption="Mouse events" />;
 
-  inputWrapper.append(table);
+  const button = <button id="demo_button">Click me!</button> as HTMLElement;
 
-  input.addEventListener('keydown', (event: KeyboardEvent) => {
-    event.preventDefault();
-    tbody.prepend(
-      <tr>
-        <td>{event.type}</td>
-        <td>
-          <EventKey key={event.key} />
-        </td>
-        <td>
-          <EventKey key={event.code} />
-        </td>
-        <td>
-          {event.ctrlKey && <EventKey key="Control" />}
-          {event.metaKey && <EventKey key="Meta" />}
-          {event.altKey && <EventKey key="Alt" />}
-          {event.shiftKey && <EventKey key="Shift" />}
-        </td>
-      </tr>
-    );
-  });
+  for (const mouseEventType of MOUSE_EVENTS) {
+    button.addEventListener(mouseEventType, addMouseEventRow(table));
+    inputArea.addEventListener(mouseEventType, addMouseEventRow(table));
+  }
 
-  input.addEventListener('keyup', (event: KeyboardEvent) => {
-    event.preventDefault();
-    tbody.prepend(
-      <tr>
-        <td>{event.type}</td>
-        <td>
-          <EventKey key={event.key} />
-        </td>
-        <td>
-          <EventKey key={event.code} />
-        </td>
-        <td>
-          {event.ctrlKey && <EventKey key="Control" />}
-          {event.metaKey && <EventKey key="Meta" />}
-          {event.altKey && <EventKey key="Alt" />}
-          {event.shiftKey && <EventKey key="Shift" />}
-        </td>
-      </tr>
-    );
-  });
-
-  inputWrapper.append(
-    <>
-      <div className="input-wrapper">
-        <label htmlFor="type_target">Type here:</label>
-        {input}
-      </div>
-      <hr />
-      {table}
-    </>
-  );
+  inputArea.appendChild(button);
+  outputArea.appendChild(table);
 });
 
-function EventKey({ key }: { key: string }) {
-  const [r, g, b] = hashToRgb(key, djb2hash);
-  const contrastColor = getContrastColor([r, g, b]);
+function modifierKeyView(event: KeyboardEvent | MouseEvent) {
+  const { ctrlKey, metaKey, shiftKey, altKey } = event;
 
-  const style = {
-    backgroundColor: `rgb(${r},${g},${b})`,
-    color: contrastColor
-  } as CSSStyleDeclaration;
+  return (
+    <>
+      {ctrlKey && <EventKey key="Control" />}
+      {metaKey && <EventKey key="Meta" />}
+      {shiftKey && <EventKey key="Shift" />}
+      {altKey && <EventKey key="Alt" />}
+    </>
+  );
+}
 
-  return <kbd style={style}>{key}</kbd>;
+function buttonsView(event: MouseEvent) {
+  const PRIMARY_ON = 1;
+  const SECONDARY_ON = 2;
+  const AUXILIARY_ON = 4;
+
+  const { buttons } = event;
+
+  const primaryPressed = !!(buttons & PRIMARY_ON);
+  const secondaryPressed = !!(buttons & SECONDARY_ON);
+  const auxiliaryPressed = !!(buttons & AUXILIARY_ON);
+
+  return (
+    <>
+      <input
+        type="checkbox"
+        readOnly={true}
+        value="primary"
+        checked={primaryPressed}
+      />
+      <input
+        type="checkbox"
+        readOnly={true}
+        value="secondary"
+        checked={secondaryPressed}
+      />
+      <input
+        type="checkbox"
+        readOnly={true}
+        value="auxiliary"
+        checked={auxiliaryPressed}
+      />
+    </>
+  );
+}
+
+function Table({ caption }: { caption: string }): HTMLTableElement {
+  return (
+    <table>
+      <caption>{caption}</caption>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Target</th>
+          <th>Related Target</th>
+          <th>Buttons</th>
+          <th>Modifier Keys</th>
+        </tr>
+      </thead>
+      <tbody />
+    </table>
+  );
 }

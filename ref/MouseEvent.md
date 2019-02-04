@@ -50,6 +50,20 @@
 - `relatedTarget`
   - for mouseover, mouseout, mouseenter, mouseleave
 
+## `buttons` lookup
+
+- `0` -- no button currently active
+- `1` -- primary button (e.g., left click)
+- `2` -- secondary button (e.g., left click)
+- `4` -- aux button (mouse/middle)
+
+|   4   |   2   |   1   |
+| :---: | :---: | :---: |
+|   1   |   0   |   0   |
+|   0   |   1   |   0   |
+|   0   |   0   |   1   |
+|   0   |   0   |   0   |
+
 ## Orders
 
 ### canon
