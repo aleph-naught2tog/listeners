@@ -7,11 +7,11 @@ const { getElementById } = html.loudlyBind(document);
 
 const MOUSE_EVENTS: mouseEventType[] = [
   'mousedown',
-  'mouseenter',
-  'mouseleave',
-  'mousemove',
-  'mouseout',
-  'mouseover',
+  // 'mouseenter',
+  // 'mouseleave',
+  // 'mousemove',
+  // 'mouseout',
+  // 'mouseover',
   'mouseup',
   'click',
   'dblclick'
@@ -58,14 +58,37 @@ document.addEventListener('DOMContentLoaded', _event => {
   const outputArea = getElementById('output_area');
   const table = <Table caption="Mouse events" />;
 
-  const button = <button id="demo_button">Click me!</button> as HTMLElement;
+  const checkboxInput = (
+    <input type="checkbox" id="click_id" />
+  ) as HTMLInputElement;
+
+  const checkboxWrapper = (
+    <p>
+      {checkboxInput}
+      <label htmlFor="click_id">Click</label>
+    </p>
+  ) as HTMLElement;
+
+  checkboxInput.addEventListener('click', (_: MouseEvent) => {
+    if (outputArea.style.display === 'none') {
+      outputArea.style.display = '';
+    } else {
+      outputArea.style.display = 'none';
+    }
+
+    if (checkboxInput.checked) {
+      checkboxWrapper.append(<p>button is checked</p>);
+    } else {
+      checkboxWrapper.append(<p>not checked</p>);
+    }
+  });
 
   for (const mouseEventType of MOUSE_EVENTS) {
-    button.addEventListener(mouseEventType, addMouseEventRow(table));
+    checkboxInput.addEventListener(mouseEventType, addMouseEventRow(table));
     inputArea.addEventListener(mouseEventType, addMouseEventRow(table));
   }
 
-  inputArea.appendChild(button);
+  inputArea.appendChild(checkboxWrapper);
   outputArea.appendChild(table);
 });
 

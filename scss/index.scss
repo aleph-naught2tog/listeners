@@ -99,3 +99,17 @@ kbd {
 .input-wrapper {
     margin: 0.5rem;
 }
+
+.error-overlay-tsc {
+    background-color: #222;
+    position: absolute;
+    z-index: 1000;
+    width: 100vw;
+    height: 100vh;
+    h1 {
+        color: red;
+    }
+    pre {
+        font-size: 1rem;
+    }
+}

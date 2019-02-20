@@ -27,8 +27,6 @@ function addChildren(
   }
 }
 
-const elementIndex: { [key: string]: number } = {};
-
 function makeTraditionalElement<E extends tags>(
   elementType: E,
   props: Partial<JSX.IntrinsicElements[E]>,

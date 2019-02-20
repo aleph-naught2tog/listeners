@@ -11,10 +11,10 @@
     // no touchy
     "moduleResolution": "node",
     "noEmit": false, // REQUIRED: `"noEmit": false
-    "module": "esnext", // REQUIRED: "module": "esnext"
+    "module": "es2015", // REQUIRED: "module": "esnext"
     "outDir": "./public/src",
     "rootDir": "./src",
-    "target": "esnext",
+    "target": "es2015",
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true
   }
